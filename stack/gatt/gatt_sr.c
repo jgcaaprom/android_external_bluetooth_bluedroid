@@ -164,41 +164,51 @@ static BOOLEAN process_read_multi_rsp (tGATT_SR_CMD *p_cmd, tGATT_STATUS status,
             *p++ = GATT_RSP_READ_MULTI;
             p_buf->len = 1;
 
-            /* Now walk through the buffers puting the data into the response in order */
-            for (ii = 0; ii < p_cmd->multi_req.num_handles; ii++)
+            if (p_cmd->multi_req.num_handles > 0)
             {
-                if (ii==0)
-                {
-                    p_rsp = (tGATTS_RSP *)GKI_getfirst (&p_cmd->multi_rsp_q);
-                }
-                else
-                {
-                    p_rsp = (tGATTS_RSP *)GKI_getnext (p_rsp);
-                }
+                p_rsp = (tGATTS_RSP *)GKI_getfirst (&p_cmd->multi_rsp_q);
 
-                if (p_rsp != NULL)
+                /* Now walk through the buffers puting the data into the response in order */
+                for (ii = 0; ii < p_cmd->multi_req.num_handles; ii++)
                 {
-
-                    total_len = (p_buf->len + p_rsp->attr_value.len);
-
-                    if (total_len >  mtu)
+                    if (ii > 0)
                     {
-                        /* just send the partial response for the overflow case */
-                        len = p_rsp->attr_value.len - (total_len - mtu);
-                        is_overflow = TRUE;
-                        GATT_TRACE_DEBUG ("multi read overflow available len=%d val_len=%d", len, p_rsp->attr_value.len );
-                    }
-                    else
-                    {
-                        len = p_rsp->attr_value.len;
+                        p_rsp = (tGATTS_RSP *)GKI_getnext (p_rsp);
                     }
 
-                    if (p_rsp->attr_value.handle == p_cmd->multi_req.handles[ii])
+                    if (p_rsp != NULL)
                     {
-                        memcpy (p, p_rsp->attr_value.value, len);
-                        if (!is_overflow)
-                            p += len;
-                        p_buf->len += len;
+
+                        total_len = (p_buf->len + p_rsp->attr_value.len);
+
+                        if (total_len >  mtu)
+                        {
+                            /* just send the partial response for the overflow case */
+                            len = p_rsp->attr_value.len - (total_len - mtu);
+                            is_overflow = TRUE;
+                            GATT_TRACE_DEBUG ("multi read overflow available len=%d val_len=%d", len, p_rsp->attr_value.len );
+                        }
+                        else
+                        {
+                            len = p_rsp->attr_value.len;
+                        }
+
+                        if (p_rsp->attr_value.handle == p_cmd->multi_req.handles[ii])
+                        {
+                            memcpy (p, p_rsp->attr_value.value, len);
+                            if (!is_overflow)
+                                p += len;
+                            p_buf->len += len;
+                        }
+                        else
+                        {
+                            p_cmd->status        = GATT_NOT_FOUND;
+                            break;
+                        }
+
+                        if (is_overflow)
+                            break;
+
                     }
                     else
                     {
@@ -206,17 +216,8 @@ static BOOLEAN process_read_multi_rsp (tGATT_SR_CMD *p_cmd, tGATT_STATUS status,
                         break;
                     }
 
-                    if (is_overflow)
-                        break;
-
-                }
-                else
-                {
-                    p_cmd->status        = GATT_NOT_FOUND;
-                    break;
-                }
-
-            } /* loop through all handles*/
+                } /* loop through all handles*/
+            }
 
 
             /* Sanity check on the buffer length */
