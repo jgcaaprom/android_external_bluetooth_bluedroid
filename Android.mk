@@ -20,6 +20,8 @@ endif
 
 include $(call all-subdir-makefiles)
 
+bdroid_CFLAGS += -Os
+
 # Cleanup our locals
 bdroid_C_INCLUDES :=
 bdroid_CFLAGS :=
