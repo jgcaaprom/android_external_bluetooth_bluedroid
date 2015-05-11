@@ -137,7 +137,7 @@ static void bdcpy (BD_ADDR a, const BD_ADDR b)
 
 
 
-void rdut_rfcomm (BOOLEAN server)
+void rdut_rfcomm (static int server)
 {
     UINT16   handle;
     int status = -1;
@@ -164,7 +164,7 @@ void rdut_rfcomm (BOOLEAN server)
     {
         ALOGI("dut RFCOMM RemoveConnection");
         RFCOMM_RemoveConnection(rfc_handle);
-    } 
+    }
     if (status == PORT_SUCCESS)
     {
         ALOGI("dut_setdata_callback");

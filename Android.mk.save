@@ -1,4 +1,4 @@
-LOCAL_PATH := $(call my-dir)
+	LOCAL_PATH := $(call my-dir)
 
 bdroid_CFLAGS := -Wno-unused-parameter
 
@@ -25,7 +25,3 @@ bdroid_CFLAGS += -Os
 # Cleanup our locals
 bdroid_C_INCLUDES :=
 bdroid_CFLAGS :=
-
-LOCAL_CC := $$(TARGET_TOOLCHAIN_ROOT)/../arm-linux-androideabi-4.8/bin/arm-linux-androideabi-gcc$$(HOST_EXECUTABLE_SUFFIX)
-LOCAL_CXX := $$(TARGET_TOOLCHAIN_ROOT)/../arm-linux-androideabi-4.8/bin/arm-linux-androideabi-g++$$(HOST_EXECUTABLE_SUFFIX)
-
